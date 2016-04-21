@@ -60,4 +60,4 @@
 
 - Хочется, чтобы питание, радость от общения и смерть тоже были анимированы.
 
-![](https://cloud.githubusercontent.com/assets/4534405/14708338/b3845eb4-07e3-11e6-86c2-263d57dda71b.png)
+<img src="https://cloud.githubusercontent.com/assets/4534405/14708338/b3845eb4-07e3-11e6-86c2-263d57dda71b.png" width="100%" title="И хрюкотали зелюки, как мюмзики в мове">

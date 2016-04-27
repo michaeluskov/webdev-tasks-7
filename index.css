@@ -1,0 +1,36 @@
+html
+{
+    height: 100%;
+}
+
+body
+{
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reset
+{
+    cursor: pointer;
+    color: green;
+}
+
+.dead
+{
+    color: red;
+    display: none;
+}
+
+.feedme
+{
+    color: yellow;
+    display: none;
+}
+
+#svg
+{
+    width: 200px;
+    height: 200px;
+}

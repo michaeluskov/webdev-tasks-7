@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="utf-8">
+		<title>Тамагочи</title>
+		<script type="text/javascript" src="bundle.js"></script>
+		<link rel="stylesheet" href="index.css">
+	</head>
+	<body>
+        <svg id="svg"></svg>
+        <div class="stats">
+            Satiety is <span class="satiety">--</span>%
+            <br>Energy is <span class="energy">--</span>%
+            <br>Happiness is <span class="happiness">--</span>%
+            <br>My action is: <span class="action">nothing</span>
+            <br><span class="feedme">Feed me!</span>
+            <br><span class="reset">Reset me!</span>
+            <br><span class="dead">I'm dead</span>
+            <br>Volume: <input type="range" min="0" max="1" step="0.1" value="1" class="volume">
+            <br>Text is: <span class="text">------</span>
+        </div>    
+        <audio class="hello">
+            <source src="media/hello.mp3" type="audio/mpeg">
+        </audio>
+	</body>
+</html>

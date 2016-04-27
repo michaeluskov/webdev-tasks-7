@@ -1,0 +1,25 @@
+{
+  "name": "hrundel",
+  "version": "1.0.0",
+  "description": "Предыдущие задания были достаточно хардкорные и формальные, поэтому в этот раз мы подготовили\r для вас кое-что фановое™. Предлагаем реализовать простую игру в стиле [тамагочи](https://ru.wikipedia.org/wiki/%D0%A2%D0%B0%D0%BC%D0%B0%D0%B3%D0%BE%D1%87%D0%B8).",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index",
+    "build": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaeluskov/webdev-tasks-7.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaeluskov/webdev-tasks-7/issues"
+  },
+  "homepage": "https://github.com/michaeluskov/webdev-tasks-7#readme",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "node-static": "^0.7.7"
+  }
+}

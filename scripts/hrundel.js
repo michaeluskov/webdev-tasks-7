@@ -15,14 +15,32 @@ var Hrundel = function (state) {
     this.changeStateCB = function (state) {};
     this.changeActionCB = function (action) {};
     
+    this.__startTicking();
+};
+
+Hrundel.prototype.__startTicking = function () {
+    if (this.__consumeTickId) {
+        return;
+    }
     this.__consumeTickId = setInterval(this.__consumeTick.bind(this), 1000);
     this.__obtainTickId = setInterval(this.__obtainTick.bind(this), 3000);
+};
+
+Hrundel.prototype.__stopTicking = function () {
+    if (!this.__stopTicking) {
+        return;
+    }
+    clearInterval(this.__consumeTickId);
+    clearInterval(this.__obtainTickId);
+    delete this.__consumeTickId;
+    delete this.__obtainTickId;
 };
 
 Hrundel.prototype.reset = function () {
     this.__state = $.extend({}, INITIAL_STATE);
     this.changeStateCB(this.__state);
     this.setAction('nothing');
+    this.__startTicking();
 };
 
 Hrundel.prototype.setAction = function (action) {
@@ -41,8 +59,7 @@ Hrundel.prototype.__consumeTick = function () {
     this.changeStateCB(this.__state);
     if (zeroCount >= 2) {
         this.setAction('nothing');
-        clearInterval(this.__consumeTickId);
-        clearInterval(this.__obtainTickId);
+        this.__stopTicking();
         this.dieCB();
     }
 };

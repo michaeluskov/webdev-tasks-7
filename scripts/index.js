@@ -5,6 +5,25 @@ var onChangeAction = function (action) {
     if (action == 'nothing') {
         stopRecognising();
     }
+    (action == 'sleeping') ? hrundelSvg.setSleeping() : hrundelSvg.setWokeUp();
+};
+
+var notify = function (text) {
+    if (!inactive || !("Notification" in window)) {
+        return;
+    }
+    Notification.requestPermission()
+    .then(function (permission) {
+        if (permission == "granted") {
+            new Notification(text);
+        }
+    });
+};
+
+var requestNotifyPermission = function () {
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
 };
 
 var onChangeState = function (state) {
@@ -14,11 +33,18 @@ var onChangeState = function (state) {
     localStorage.setItem('satiety', state.satiety);
     localStorage.setItem('energy', state.energy);
     localStorage.setItem('happiness', state.happiness);
+    hrundelSvg.setSatiety(state.satiety);
+    Object.keys(state).forEach(function (key) {
+        if (state[key] == 10) {
+            notify(key + ' is 10%!');
+        }
+    });
 };
 
 var onDie = function () {
     $('.dead').show();
     needToPlaySounds = false;
+    hrundelSvg.setDead();
 };
 
 var getStateFromLocalStorage = function () {
@@ -90,6 +116,7 @@ var stopRecognising = function () {
 };
 
 $(window).load(function () {
+    requestNotifyPermission();
     window.needToPlaySounds = true;
     window.hrundelSvg = new HrundelSvg();
     hrundelSvg.create('#svg');
@@ -101,6 +128,7 @@ $(window).load(function () {
         $('.dead').hide();
         needToPlaySounds = true;
         hrundel.reset();
+        hrundelSvg.setAlive();
     });
     setBatteryHandler();
     setAmbientLightHandler();
@@ -115,9 +143,11 @@ $(window).load(function () {
 });
 
 $(window).focus(function () {
+    window.inactive = false;
     hrundel.setAction('nothing');
 });
 
 $(window).blur(function () {
+    window.inactive = true;
     hrundel.setAction('sleeping');
 });

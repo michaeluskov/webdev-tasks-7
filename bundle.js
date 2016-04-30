@@ -18029,14 +18029,32 @@ var Hrundel = function (state) {
     this.changeStateCB = function (state) {};
     this.changeActionCB = function (action) {};
     
+    this.__startTicking();
+};
+
+Hrundel.prototype.__startTicking = function () {
+    if (this.__consumeTickId) {
+        return;
+    }
     this.__consumeTickId = setInterval(this.__consumeTick.bind(this), 1000);
     this.__obtainTickId = setInterval(this.__obtainTick.bind(this), 3000);
+};
+
+Hrundel.prototype.__stopTicking = function () {
+    if (!this.__stopTicking) {
+        return;
+    }
+    clearInterval(this.__consumeTickId);
+    clearInterval(this.__obtainTickId);
+    delete this.__consumeTickId;
+    delete this.__obtainTickId;
 };
 
 Hrundel.prototype.reset = function () {
     this.__state = $.extend({}, INITIAL_STATE);
     this.changeStateCB(this.__state);
     this.setAction('nothing');
+    this.__startTicking();
 };
 
 Hrundel.prototype.setAction = function (action) {
@@ -18055,8 +18073,7 @@ Hrundel.prototype.__consumeTick = function () {
     this.changeStateCB(this.__state);
     if (zeroCount >= 2) {
         this.setAction('nothing');
-        clearInterval(this.__consumeTickId);
-        clearInterval(this.__obtainTickId);
+        this.__stopTicking();
         this.dieCB();
     }
 };
@@ -18086,20 +18103,94 @@ var HrundelSvg = function () {
 
 HrundelSvg.prototype.create = function (selector) {
     this.__snap = Snap(selector);
-    var bigCircle = this.__snap.circle(100, 100, 50);
-    bigCircle.attr({
+    this.__bigCircle = this.__snap.circle(100, 100, 70).attr({
         fill: '#ff9999'
     });
-    var leftEye = this.__snap.circle(70, 95, 10);
-    var rightEye = this.__snap.circle(130, 95, 10);
-    var nose = this.__snap.polygon(100, 95, 97, 110, 103, 110);
-}
+    this.__leftEye = this.__snap.circle(70, 95, 10);
+    this.__rightEye = this.__snap.circle(130, 95, 10);
+    this.__leftPupil = this.__snap.circle(70, 95, 2).attr({
+        fill: 'white'
+    });
+    this.__rightPupil = this.__snap.circle(130, 95, 2).attr({
+        fill: 'white'
+    });
+    this.__leftEave = this.__snap.circle(70, 74, 11).attr({
+        fill: '#ff9999'
+    });
+    this.__rightEave = this.__snap.circle(130, 74, 11).attr({
+        fill: '#ff9999'
+    });
+    this.__nose = this.__snap.polygon(100, 95, 97, 110, 103, 110);
+};
+
+HrundelSvg.prototype.setSatiety = function (percentage) {
+    var radius = 50 + (percentage / 5);
+    this.__bigCircle.animate({r: radius}, 150);
+};
+
+
+HrundelSvg.prototype.setSleeping = function () {
+    if (this.__isSleeping) {
+        return;
+    }
+    this.__isSleeping = true;
+    this.__leftEave.animate({cy: 95}, 1000);
+    this.__rightEave.animate({cy: 95}, 1000);
+};
+
+HrundelSvg.prototype.setWokeUp = function () {
+    if (!this.__isSleeping) {
+        return;
+    }
+    this.__isSleeping = false;
+    this.__leftEave.animate({cy: 74}, 1000);
+    this.__rightEave.animate({cy: 74}, 1000);
+};
+
+HrundelSvg.prototype.setDead = function () {
+    if (this.__isDead) {
+        return;
+    }
+    this.__isDead = true;
+    this.__leftPupil.animate({r: 0}, 1000);
+    this.__rightPupil.animate({r: 0}, 1000);
+};
+
+HrundelSvg.prototype.setAlive = function () {
+    if (!this.__isDead) {
+        return;
+    }
+    this.__isDead = false;
+    this.__leftPupil.animate({r: 2}, 1000);
+    this.__rightPupil.animate({r: 2}, 1000);
+};
+
 'use strict';
 
 var onChangeAction = function (action) {
     $('.action').html(action);
     if (action == 'nothing') {
         stopRecognising();
+    }
+    (action == 'sleeping') ? hrundelSvg.setSleeping() : hrundelSvg.setWokeUp();
+};
+
+var notify = function (text) {
+    if (!inactive || !("Notification" in window)) {
+        return;
+    }
+    Notification.requestPermission()
+    .then(function (permission) {
+        console.log(permission);
+        if (permission == "granted") {
+            new Notification(text);
+        }
+    });
+};
+
+var requestNotifyPermission = function () {
+    if ("Notification" in window) {
+        Notification.requestPermission();
     }
 };
 
@@ -18110,11 +18201,18 @@ var onChangeState = function (state) {
     localStorage.setItem('satiety', state.satiety);
     localStorage.setItem('energy', state.energy);
     localStorage.setItem('happiness', state.happiness);
+    hrundelSvg.setSatiety(state.satiety);
+    Object.keys(state).forEach(function (key) {
+        if (state[key] == 10) {
+            notify(key + ' is 10%!');
+        }
+    });
 };
 
 var onDie = function () {
     $('.dead').show();
     needToPlaySounds = false;
+    hrundelSvg.setDead();
 };
 
 var getStateFromLocalStorage = function () {
@@ -18186,6 +18284,7 @@ var stopRecognising = function () {
 };
 
 $(window).load(function () {
+    requestNotifyPermission();
     window.needToPlaySounds = true;
     window.hrundelSvg = new HrundelSvg();
     hrundelSvg.create('#svg');
@@ -18197,6 +18296,7 @@ $(window).load(function () {
         $('.dead').hide();
         needToPlaySounds = true;
         hrundel.reset();
+        hrundelSvg.setAlive();
     });
     setBatteryHandler();
     setAmbientLightHandler();
@@ -18211,9 +18311,11 @@ $(window).load(function () {
 });
 
 $(window).focus(function () {
+    window.inactive = false;
     hrundel.setAction('nothing');
 });
 
 $(window).blur(function () {
+    window.inactive = true;
     hrundel.setAction('sleeping');
 });
